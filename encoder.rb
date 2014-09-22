@@ -1,9 +1,10 @@
 class Encoder
-  def initialize(text, keyword, alphabet)
+  def initialize(text, keyword, alphabet, method)
     @text = text
     @keyword = keyword
     @keychar_index = 0
     @alphabet = alphabet
+    @method = method
   end
   def get_index_by_char(char)
     index = 0
@@ -35,7 +36,15 @@ class Encoder
     if !@alphabet.include?(source_char)
       return source_char
     end
-      return @alphabet[(self.get_index_by_char(source_char) + self.get_next_keychar_runningkey)%@alphabet.size]
+    case @method
+      when(0)
+        next_keychar = self.get_next_keychar_simplekey
+      when(1)
+        next_keychar = self.get_next_keychar_runningkey
+      when(2)
+        next_keychar = self.get_next_keychar_autokey
+    end
+      return @alphabet[(self.get_index_by_char(source_char) + next_keychar)%@alphabet.size]
   end
   def encode
     ciphertext = []
