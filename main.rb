@@ -92,6 +92,7 @@ class Main < FXMainWindow
         pattern = ciphertext[index..index+2]
         is_not_founded = true
         indexies =[]
+        prev_index = index
         (index+1..ciphertext.size-2).each{|index|
         substring = ciphertext[index..index+2]
         if pattern==substring
@@ -99,14 +100,12 @@ class Main < FXMainWindow
             is_not_founded = false
             p pattern
           end
-          indexies<<index
+          indexies<<index-prev_index
           p index
         end}
-        if !(indexies.empty?)
-          temp_nod = indexies[-1]
-          previous_index = 0
-          indexies.each{|number| temp_nod=temp_nod.gcd(number-previous_index)
-          previous_index = number}
+        if indexies.size>1
+          temp_nod = indexies[0]
+          indexies.each{|number| temp_nod=temp_nod.gcd(number)}
           p 'NOD'
           p temp_nod
         end
