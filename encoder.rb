@@ -1,6 +1,7 @@
 class Encoder
   def initialize(text, keyword, alphabet, method)
     @text = text
+    @text_simpled = @text.gsub(/[^а-яё]/, '')
     @keyword = keyword
     @keychar_index = 0
     @alphabet = alphabet
@@ -21,7 +22,7 @@ class Encoder
   end
 
   def get_next_keychar_autokey
-    keychar = (@keyword+@text)[@keychar_index]
+    keychar = (@keyword+@text_simpled)[@keychar_index]
     @keychar_index+=1
     return self.get_index_by_char(keychar)
   end
@@ -46,9 +47,30 @@ class Encoder
     end
       return @alphabet[(self.get_index_by_char(source_char) + next_keychar)%@alphabet.size]
   end
+  def get_decodered_char(source_char)
+    if !@alphabet.include?(source_char)
+      return source_char
+    end
+    case @method
+      when(0)
+        next_keychar = self.get_next_keychar_simplekey
+      when(1)
+        next_keychar = self.get_next_keychar_runningkey
+      when(2)
+        next_keychar = self.get_next_keychar_autokey
+    end
+    return @alphabet[(self.get_index_by_char(source_char) - next_keychar+@alphabet.size)%@alphabet.size]
+  end
   def encode
-    ciphertext = []
-    (0...@text.size).each{|index| ciphertext<<get_encodered_char(@text[index])}
+    ciphertext = ''
+    (0...@text.size).each{|index| ciphertext+=get_encodered_char(@text[index])}
     return ciphertext
+  end
+  def decode(ciphertext)
+    @text = ''
+    @keychar_index = 0
+    (0...ciphertext.size).each{|index|
+      @text+=get_decodered_char(ciphertext[index])}
+    return @text
   end
 end
