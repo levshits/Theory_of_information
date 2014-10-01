@@ -70,7 +70,8 @@ class Encoder
     @text = ''
     @keychar_index = 0
     (0...ciphertext.size).each{|index|
-      @text+=get_decodered_char(ciphertext[index])}
+      @text+=get_decodered_char(ciphertext[index])
+      @text_simpled = @text.gsub(/[^а-яё]/, '')}
     return @text
   end
 end

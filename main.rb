@@ -116,7 +116,8 @@ class Main < FXMainWindow
     ciphertext = @sourcetextbox.text.to_s
     ciphertext.gsub!(/[^а-яё]/, '')
     used_patterns = []
-    (2..7).each{|size|
+    distanses = Array.new(2){Array.new}
+    (2...3).each{|size|
     (0...ciphertext.size-size).each { |index|
       pattern = ciphertext[index..index+size]
     if !(used_patterns.include?(pattern))
@@ -134,6 +135,8 @@ class Main < FXMainWindow
             used_patterns<<pattern
           end
           indexies<<(index-prev_index)
+
+          prev_index = index
           pattern_result +=' '+indexies[-1].to_s
         end }
 
@@ -141,19 +144,57 @@ class Main < FXMainWindow
         temp_nod = indexies[0]
         indexies.each { |number| temp_nod=temp_nod.gcd(number) }
         @resulttextbox.appendText(pattern_result+' NOD' + " #{temp_nod}"+"\n")
+        if !(distanses[0].include?(temp_nod)) and (temp_nod !=1)
+          distanses[0]<<temp_nod
+          distanses[1]<<1
+        else
+          (0...distanses[0].size).each{|i| if distanses[0][i] == temp_nod
+                                             distanses[1][i]+=1
+                                             break
+                                           end
+          }
+        end
       end
     end}}
+    p distanses
+    (0...distanses[0].size).each{|i|
+      (0...distanses[0].size).each{|j|
+        if distanses[1][i]>distanses[1][j]
+          temp =distanses[1][i]
+          distanses[1][i]=distanses[1][j]
+          distanses[1][j] = temp
+          temp =distanses[0][i]
+          distanses[0][i]=distanses[0][j]
+          distanses[0][j] = temp
+        end
+      }}
+    p distanses
+    if(distanses[0].size>1)
+      @resulttextbox.insertText 0, distanses[0][0].gcd(distanses[0][1]).to_s + ' is posibly answer'+"\n"
+    elsif distanses[0].size == 1
+      @resulttextbox.insertText 0, distanses[0][0].to_s + ' is posibly key'+"\n"
+    end
+
+    p distanses
   end
   def open_menu_click
     p 'Open'
     file_open_dialog = FXFileDialog.new(self,'Open text file')
     file_open_dialog.execute
     p file_open_dialog.filename
-    @sourcetextbox.setText IO.read(file_open_dialog.filename)
+    if File.exist?(file_open_dialog.filename)
+      @sourcetextbox.setText IO.read(file_open_dialog.filename)
+    end
   end
   def save_menu_click
     file_save_dialog = FXFileDialog.new(self,'Open text file')
     file_save_dialog.execute
+    if File.exist?(file_save_dialog.filename)
+      if FXMessageBox.new(self,'Warning','Do you want rewrite file?',:opts=>MBOX_YES_NO).execute(PLACEMENT_SCREEN) ==MBOX_CLICKED_NO
+        return
+      end
+    end
+    @sourcetextbox.setText IO.read(file_open_dialog.filename)
     IO.write(file_save_dialog.filename, @resulttextbox.text)
   end
   def exit_menu_click
